@@ -1,0 +1,106 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  title: Simple Artist API
+  description: A simple API to illustrate OpenAPI concepts
+
+paths:
+  /artists:
+    get:
+      description: Returns a list of artists
+      responses:
+        '200':
+          description: Successfully returned a list of artists
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Artist'
+        '400':
+          $ref: '#/components/responses/400Error'
+
+      x-amazon-apigateway-integration:
+        uri: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/{{ListArtistsLambda}}/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        type : "aws_proxy"
+
+    post:
+      description: Lets a user post a new artist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Artist'
+      responses:
+        '200':
+          description: Successfully created a new artist
+        '400':
+          $ref: '#/components/responses/400Error'
+      x-amazon-apigateway-integration:
+        uri: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/{{CreateArtistLambda}}/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        type : "aws_proxy"
+
+
+  /artists/{name}:
+    get:
+      description: Obtain information about an artist from his or her unique id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: Successfully returned an artist
+          content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Artist'
+
+      x-amazon-apigateway-integration:
+        uri: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/{{GetArtistLambda}}/invocations"
+        passthroughBehavior: "when_no_match"
+        httpMethod: "POST"
+        type: "aws_proxy"
+
+components:
+  schemas:
+    Artist:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        albums_recorded:
+          type: integer
+
+  responses:
+    400Error:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+
+
+# Define one ore more validators
+x-amazon-apigateway-request-validators:
+  all:
+    validateRequestBody: true
+    validateRequestParameters: true
+
+# Enable global validator, can be overridden per method
+x-amazon-apigateway-request-validator: all
