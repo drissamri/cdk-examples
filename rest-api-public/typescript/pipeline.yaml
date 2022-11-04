@@ -55,7 +55,6 @@ stages:
             inputs:
               command: ci
               workingDir: ${{ variables.WORKDIR }}
-              customEndpoint: ns-npm-nexus
           - task: Npm@1
             displayName: 'npm audit'
             inputs:
