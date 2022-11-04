@@ -1,5 +1,6 @@
 variables:
   AWS_SERVICE_CONNECTION_DEV: aws-awsome-sbx # <<Fill in the name of your own service connection here>>
+  WORKDIR: 'rest-api-public/typescript'
 
 parameters:
   - name: environments
@@ -38,11 +39,6 @@ stages:
       - job: Audit
         displayName: Audit
         steps:
-          - task: CmdLine@2
-            inputs:
-              script: |
-                echo "Structure of work folder of this pipeline:"
-                ls -al
           - task: NodeTool@0
             displayName: 'Install Node.js'
             inputs:
@@ -51,10 +47,12 @@ stages:
             displayName: Install deps
             inputs:
               command: ci
+              workingDir: ${WORKDIR}
           - task: Npm@1
             displayName: Audit deps
             inputs:
               command: custom
               customCommand: audit --audit-level=high --omit=dev
+              workingDir: ${WORKDIR}
 
 
