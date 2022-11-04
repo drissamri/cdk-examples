@@ -62,7 +62,8 @@ stages:
           - task: Npm@1
             displayName: 'npm test'
             inputs:
-              command: test
+              command: custom
+              customCommand: run test
               workingDir: ${{ variables.WORKDIR }}
               customEndpoint: ${{ variables.NPM_NEXUS_SERVICE_CONNECTION }}
           - task: PublishTestResults@2
