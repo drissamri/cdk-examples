@@ -35,6 +35,10 @@ pool:
 stages:
   - stage: Build
     jobs:
+      - task: NodeTool@0
+        inputs:
+          versionSpec: '16.x'
+        displayName: 'Install Node.js'
       - job: Audit
         displayName: Audit
         steps:
@@ -51,6 +55,10 @@ stages:
       - job: Analyze
         displayName: Static Code Analysis
         steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '16.x'
+
           - task: Npm@1
             displayName: Install deps
             inputs:
@@ -73,6 +81,10 @@ stages:
       - job: Test
         displayName: Unit tests
         steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '16.x'
+
           - task: Npm@1
             displayName: Install deps
             inputs:
@@ -86,6 +98,10 @@ stages:
       - job: Synth
         displayName: CDK Synth
         steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '16.x'
+
           - ${{ each environment in parameters.environments }}:
               - task: AWSShellScript@1
                 displayName: CDK synth
@@ -108,6 +124,10 @@ stages:
     # explicit no deps to run stage in parallel with build
     dependsOn: []
     jobs:
+      - task: NodeTool@0
+        inputs:
+          versionSpec: '16.x'
+
       - job: Test
         displayName: Integration Tests
         steps:
