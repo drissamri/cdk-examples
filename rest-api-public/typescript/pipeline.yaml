@@ -3,6 +3,7 @@ variables:
   NPM_NEXUS_SERVICE_CONNECTION: ns-npm-nexus
   # TODO: Change location to where your package.json is located, probably '.'
   WORKDIR: 'rest-api-public/typescript'
+  NODE_VERSION: '16.x'
 
 parameters:
   - name: environments
@@ -25,8 +26,8 @@ resources:
       type: git
       ref: master
     - repository: ns-shared-guard-rules
-      type: git
       name: NSCAWS/ns-shared-guard-rules
+      type: git
     - repository: shared-templates
       name: NSPAAS/azure-devops-templates
       type: git
@@ -44,16 +45,32 @@ stages:
           - task: NodeTool@0
             displayName: 'Install Node.js'
             inputs:
-              versionSpec: '16.x'
+              versionSpec: ${ NODE_VERSION }
           - task: Npm@1
             displayName: 'npm ci'
             inputs:
               command: ci
-              workingDir: ${{ variables.WORKDIR }}
+              workingDir: ${{ WORKDIR }}
               customEndpoint: ${{ variables.NPM_NEXUS_SERVICE_CONNECTION }}
           - task: Npm@1
             displayName: 'npm audit'
             inputs:
               command: custom
               customCommand: audit --audit-level=high --omit=dev
-              workingDir: ${{ variables.WORKDIR }}
+              workingDir: ${{ WORKDIR }}
+
+          - task: Npm@1
+            displayName: 'npm test'
+            inputs:
+              command: test
+              workingDir: ${{ WORKDIR }}
+              customEndpoint: ${{ variables.NPM_NEXUS_SERVICE_CONNECTION }}
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: 'junit.xml'
+              failTaskOnFailedTests: true
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: 'Cobertura'
+              summaryFileLocation: 'coverage/cobertura-coverage.xml'
