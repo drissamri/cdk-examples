@@ -56,10 +56,8 @@ stages:
               command: ci
               workingDir: ${{ variables.WORKDIR }}
           - task: Npm@1
-            displayName: 'npm audit''
+            displayName: 'npm audit'
             inputs:
               command: custom
               customCommand: audit --audit-level=high --omit=dev
               workingDir: ${{ variables.WORKDIR }}
-
-
