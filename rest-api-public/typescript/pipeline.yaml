@@ -46,8 +46,6 @@ stages:
             inputs:
               workingFile: ${{ variables.WORKDIR }}/.npmrc
               customEndpoint: ${{ variables.NPM_NEXUS_SERVICE_CONNECTION }}
-            env:
-              NVMRC_PATH: ${{ variables.WORKDIR }}/.npmrc
           - task: NodeTool@0
             displayName: 'Install Node.js'
             inputs:
