@@ -47,12 +47,12 @@ stages:
             displayName: Install deps
             inputs:
               command: ci
-              workingDir: ${WORKDIR}
+              workingDir: ${{ variables.WORKDIR }}
           - task: Npm@1
             displayName: Audit deps
             inputs:
               command: custom
               customCommand: audit --audit-level=high --omit=dev
-              workingDir: ${WORKDIR}
+              workingDir: ${{ variables.WORKDIR }}
 
 
