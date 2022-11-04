@@ -44,7 +44,7 @@ stages:
           - task: npmAuthenticate@0
             displayName: "Authorize with NS NPM Nexus"
             inputs:
-              workingFile: .npmrc
+              workingFile: ${{ variables.WORKDIR }}/.npmrc
               customEndpoint: ${{ variables.NPM_NEXUS_SERVICE_CONNECTION }}
           - task: NodeTool@0
             displayName: 'Install Node.js'
