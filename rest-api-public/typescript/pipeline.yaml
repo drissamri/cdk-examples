@@ -85,7 +85,6 @@ stages:
 
       - job: Synth
         displayName: CDK Synth
-        dependsOn: Gradle
         steps:
           - ${{ each environment in parameters.environments }}:
               - task: AWSShellScript@1
