@@ -63,14 +63,12 @@ stages:
             displayName: 'npm test'
             inputs:
               command: custom
-              customCommand: run test --if-present
+              customCommand: run test
               workingDir: $(WORKDIR)
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
 
           - task: PublishTestResults@2
             inputs:
-              testResultsFormat: 'JUnit'
-              testResultsFiles: 'junit.xml'
               failTaskOnFailedTests: true
           - task: PublishCodeCoverageResults@1
             inputs:
