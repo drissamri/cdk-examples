@@ -59,13 +59,10 @@ stages:
               customCommand: audit --audit-level=high --omit=dev
               workingDir: $(WORKDIR)
 
-          - task: Npm@1
+          - script: |
+              npm run test --if-present
             displayName: 'npm test'
-            inputs:
-              command: custom
-              customCommand: run test --passWithNoTests
-              workingDir: $(WORKDIR)
-              customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
+
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'JUnit'
