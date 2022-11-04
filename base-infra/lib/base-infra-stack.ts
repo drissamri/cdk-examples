@@ -3,7 +3,6 @@ import { Construct } from 'constructs';
 import {StringParameter} from "aws-cdk-lib/aws-ssm";
 import {HostedZone, IHostedZone} from "aws-cdk-lib/aws-route53";
 import {DnsValidatedCertificate} from "aws-cdk-lib/aws-certificatemanager";
-import {DomainName, EndpointType, SecurityPolicy} from "aws-cdk-lib/aws-apigateway";
 
 export class BaseInfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
