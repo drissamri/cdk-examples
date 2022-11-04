@@ -50,20 +50,20 @@ stages:
             displayName: 'npm ci'
             inputs:
               command: ci
-              workingDir: ${{ WORKDIR }}
+              workingDir: ${ WORKDIR }
               customEndpoint: ${{ variables.NPM_NEXUS_SERVICE_CONNECTION }}
           - task: Npm@1
             displayName: 'npm audit'
             inputs:
               command: custom
               customCommand: audit --audit-level=high --omit=dev
-              workingDir: ${{ WORKDIR }}
+              workingDir: ${ WORKDIR }
 
           - task: Npm@1
             displayName: 'npm test'
             inputs:
               command: test
-              workingDir: ${{ WORKDIR }}
+              workingDir: ${ WORKDIR }
               customEndpoint: ${{ variables.NPM_NEXUS_SERVICE_CONNECTION }}
           - task: PublishTestResults@2
             inputs:
