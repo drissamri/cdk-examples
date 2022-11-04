@@ -42,21 +42,23 @@ stages:
         displayName: Audit
         steps:
           - task: npmAuthenticate@0
-            displayName: "Authorize with NS NPM Nexus"
+            displayName: "npm auth"
             inputs:
               workingFile: ${{ variables.WORKDIR }}/.npmrc
               customEndpoint: ${{ variables.NPM_NEXUS_SERVICE_CONNECTION }}
+            env:
+              NVMRC_PATH: ${{ variables.WORKDIR }}/.npmrc
           - task: NodeTool@0
             displayName: 'Install Node.js'
             inputs:
               versionSpec: '16.x'
           - task: Npm@1
-            displayName: Install deps
+            displayName: 'npm ci'
             inputs:
               command: ci
               workingDir: ${{ variables.WORKDIR }}
           - task: Npm@1
-            displayName: Audit deps
+            displayName: 'npm audit''
             inputs:
               command: custom
               customCommand: audit --audit-level=high --omit=dev
