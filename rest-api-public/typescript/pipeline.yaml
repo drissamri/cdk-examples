@@ -45,27 +45,27 @@ stages:
           - task: NodeTool@0
             displayName: 'Install Node.js'
             inputs:
-              versionSpec: ${{ variables.NODE_VERSION }}
+              versionSpec: $(NODE_VERSION)
           - task: Npm@1
             displayName: 'npm ci'
             inputs:
               command: ci
-              workingDir: ${{ variables.WORKDIR }}
-              customEndpoint: ${{ variables.NPM_NEXUS_SERVICE_CONNECTION }}
+              workingDir: $(WORKDIR)
+              customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
           - task: Npm@1
             displayName: 'npm audit'
             inputs:
               command: custom
               customCommand: audit --audit-level=high --omit=dev
-              workingDir: ${{ variables.WORKDIR }}
+              workingDir: $(WORKDIR)
 
           - task: Npm@1
             displayName: 'npm test'
             inputs:
               command: custom
               customCommand: run test --passWithNoTests
-              workingDir: ${{ variables.WORKDIR }}
-              customEndpoint: ${{ variables.NPM_NEXUS_SERVICE_CONNECTION }}
+              workingDir: $(WORKDIR)
+              customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
           - task: PublishTestResults@2
             inputs:
               testResultsFormat: 'JUnit'
