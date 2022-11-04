@@ -45,7 +45,7 @@ stages:
             displayName: "npm auth"
             inputs:
               workingFile: ${{ variables.WORKDIR }}/.npmrc
-              customEndpoint: 'ns-npm-nexus'
+              customEndpoint: ${{ variables.NPM_NEXUS_SERVICE_CONNECTION }}
           - task: NodeTool@0
             displayName: 'Install Node.js'
             inputs:
@@ -55,7 +55,7 @@ stages:
             inputs:
               command: ci
               workingDir: ${{ variables.WORKDIR }}
-              customEndpoint: 'ns-npm-nexus'
+              customEndpoint: ${{ variables.NPM_NEXUS_SERVICE_CONNECTION }}
           - task: Npm@1
             displayName: 'npm audit'
             inputs:
