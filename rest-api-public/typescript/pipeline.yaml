@@ -1,5 +1,7 @@
 variables:
   AWS_SERVICE_CONNECTION_DEV: aws-awsome-sbx # <<Fill in the name of your own service connection here>>
+  NPM_NEXUS_SERVICE_CONNECTION: ns-npm-nexus
+  # TODO: Change location to where your package.json is located, probably '.'
   WORKDIR: 'rest-api-public/typescript'
 
 parameters:
@@ -39,6 +41,11 @@ stages:
       - job: Audit
         displayName: Audit
         steps:
+          - task: npmAuthenticate@0
+            displayName: "Authorize with NS NPM Nexus"
+            inputs:
+              workingFile: .npmrc
+              customEndpoint: ${{ NPM_NEXUS_SERVICE_CONNECTION }}
           - task: NodeTool@0
             displayName: 'Install Node.js'
             inputs:
