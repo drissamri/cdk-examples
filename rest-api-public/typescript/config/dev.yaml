@@ -1,0 +1,9 @@
+AWSAccount: '921999976166'
+AWSRegion: 'eu-west-1'
+
+Environment: dev
+
+Parameters:
+
+Tags:
+  Environment: dev

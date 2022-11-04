@@ -47,13 +47,6 @@ export class ApiStack extends cdk.Stack {
         listLambda.grantInvoke(apigwServicePrincipal)
         createLambda.grantInvoke(apigwServicePrincipal)
         getLambda.grantInvoke(apigwServicePrincipal)
-
-        // TODO: Should be accessible from this specific REST API only?
-        /*   createLambda.addPermission('PermitAPIGWInvocation', {
-            principal: new iam.ServicePrincipal('apigateway.amazonaws.com'),
-            sourceArn: restApi.arnForExecuteApi(),
-            action: 'lambda:InvokeFunction'
-        });*/
     }
 
     private createDatabase(): Table {

@@ -1,0 +1,15 @@
+# TODO: <Insert application name>
+App: 'serverless-example'
+
+Parameters:
+
+Tags:
+  # TODO: <Insert correct tags>
+  Application: 'serverless-example'
+  BOIT: 'test'
+  Department: 'ComIT'
+  Team: 'test'
+  ApplicationServiceID: '1111'
+  Environment: Dev
+  # Specific AWS tag to get 25% Discount on the first year
+  map-migrated: d-server-00tl810rxa1dds
