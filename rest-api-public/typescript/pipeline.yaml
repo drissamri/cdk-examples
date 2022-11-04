@@ -41,11 +41,6 @@ stages:
       - job: Audit
         displayName: Audit
         steps:
-          - task: npmAuthenticate@0
-            displayName: "npm auth"
-            inputs:
-              workingFile: ${{ variables.WORKDIR }}/.npmrc
-              customEndpoint: ns-npm-nexus
           - task: NodeTool@0
             displayName: 'Install Node.js'
             inputs:
