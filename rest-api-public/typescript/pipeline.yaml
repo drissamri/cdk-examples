@@ -1,5 +1,5 @@
 variables:
-  AWS_SERVICE_CONNECTION_DEV: aws-awsome-dev # <<Fill in the name of your own service connection here>>
+  AWS_SERVICE_CONNECTION_DEV: aws-awsome-sbx # <<Fill in the name of your own service connection here>>
 
 parameters:
   - name: environments
