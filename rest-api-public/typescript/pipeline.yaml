@@ -59,9 +59,13 @@ stages:
               customCommand: audit --audit-level=high --omit=dev
               workingDir: $(WORKDIR)
 
-          - script: |
-              npm run test --if-present
+          - task: Npm@1
             displayName: 'npm test'
+            inputs:
+              command: custom
+              customCommand: run test --if-present
+              workingDir: $(WORKDIR)
+              customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
 
           - task: PublishTestResults@2
             inputs:
