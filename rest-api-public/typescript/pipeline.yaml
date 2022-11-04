@@ -38,9 +38,20 @@ stages:
       - job: Audit
         displayName: Audit
         steps:
-          - task: Bash@3
+          - task: CmdLine@2
             inputs:
-              script: 'ls -al'
+              script: |
+                echo "Structure of work folder of this pipeline:"
+                tree $(Agent.WorkFolder)/1
+
+                echo "Build.ArtifactStagingDirectory:" 
+                echo "$(Build.ArtifactStagingDirectory)"
+
+                echo "Build.BinariesDirectory:" 
+                echo "$(Build.BinariesDirectory)"
+
+                echo "Build.SourcesDirectory:"
+                echo "$(Build.SourcesDirectory)"
           - task: NodeTool@0
             displayName: 'Install Node.js'
             inputs:
