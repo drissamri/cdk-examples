@@ -10,7 +10,7 @@
     "test": "jest --coverage --coverageReporters=cobertura --reporters=jest-junit --passWithNoTests",
     "cdk": "cdk",
     "lint": "eslint cdk/**/*.ts app/**/*.ts",
-    "cdk-synth-dev": "cdk synth -c config=dev -c genericConfig=generic"
+    "cdk-deploy-dev": "cdk deploy -c config=dev -c genericConfig=generic"
   },
   "devDependencies": {
     "@ns/cdk-helper": "2.0.1",

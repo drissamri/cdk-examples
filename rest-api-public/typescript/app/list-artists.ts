@@ -9,7 +9,7 @@ const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 
 class Lambda implements LambdaInterface {
     public async handler(_event: APIGatewayProxyEvent, _context: Context): Promise<APIGatewayProxyStructuredResultV2> {
-        // Only an example, please do your research before using the Scan command in production!
+        // Only an example, please do your research before using the DynamoDB Scan command in production!
         const params:ScanCommand = new ScanCommand( {
             TableName: process.env.ARTIST_TABLE,
             Limit: 20

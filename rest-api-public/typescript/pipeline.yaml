@@ -1,7 +1,7 @@
 variables:
   AWS_SERVICE_CONNECTION_DEV: aws-awsome-sbx # <<Fill in the name of your own service connection here>>
   NPM_NEXUS_SERVICE_CONNECTION: ns-npm-nexus
-  # TODO: Change location to where your package.json is located, probably '.'
+  # TODO: Change location to where your package.json is located, most likely in root '.'
   WORKDIR: 'rest-api-public/typescript'
   NODE_VERSION: '16.x'
 
@@ -66,7 +66,6 @@ stages:
               customCommand: run test
               workingDir: $(WORKDIR)
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
-
           - task: PublishTestResults@2
             inputs:
               failTaskOnFailedTests: true

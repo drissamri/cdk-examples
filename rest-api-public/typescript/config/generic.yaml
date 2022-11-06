@@ -1,15 +1,16 @@
-# TODO: <Insert application name>
-App: 'serverless-example'
-
 Parameters:
 
 Tags:
-  # TODO: <Insert correct tags>
-  Application: 'serverless-example'
-  BOIT: 'test'
-  Department: 'ComIT'
-  Team: 'test'
-  ApplicationServiceID: '1111'
-  Environment: Dev
-  # Specific AWS tag to get 25% Discount on the first year
+  # TODO: https://nsdigitaal.sharepoint.com/sites/NSCloudWiki/SitePages/Tagging-strategie.aspx
+  ApplicationServiceID: 'ASIDxxxxxxx'
+  BOIT: 'boit'
+  CIA: '111'
+  Application: 'artists-api'
+  Team: 'awsome'
   map-migrated: d-server-00tl810rxa1dds
+
+  # TODO: TO REMOVE
+  Department: 'ComIT'
+
+# TODO: TO REMOVE
+App: 'artists-api'

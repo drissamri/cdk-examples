@@ -1,8 +1,10 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import {StringParameter} from "aws-cdk-lib/aws-ssm";
-import {HostedZone, IHostedZone} from "aws-cdk-lib/aws-route53";
+import {HostedZone, IHostedZone, RecordSet, RecordTarget, RecordType} from "aws-cdk-lib/aws-route53";
 import {DnsValidatedCertificate} from "aws-cdk-lib/aws-certificatemanager";
+import {DomainName, EndpointType, SecurityPolicy} from "aws-cdk-lib/aws-apigateway";
+import {ApiGateway} from "aws-cdk-lib/aws-route53-targets";
 
 export class BaseInfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -37,11 +39,13 @@ export class BaseInfraStack extends cdk.Stack {
       hostedZone,
     });
 
-    /*const domain = new DomainName(this, "ApiGwDomainName", {
+    /**
+     * Setup a custom domain in AWS API Gateway that can be used by other applications
+     */
+    const domain = new DomainName(this, "ApiGwDomainName", {
       domainName: subDomain,
       certificate,
-      securityPolicy: SecurityPolicy.TLS_1_2,
       endpointType: EndpointType.EDGE,
-    })*/
+    })
   }
 }

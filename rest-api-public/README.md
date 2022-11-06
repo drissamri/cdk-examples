@@ -18,15 +18,14 @@ It purpose is to expose an API to public customers.
 
 ## Useful commands
 
-* `npm run build`   compile typescript to js
-* `npm run test`    perform the jest unit tests
-* `cdk synth`       emits the synthesized CloudFormation template
-* `cdk deploy`      deploy this stack to your default AWS account/region
+* `npm run build` compile typescript to js
+* `npm run test` perform the jest unit tests
+* `num run cdk-deploy-dev` deploy this stack to your default AWS account/region
 
 ## Available Versions
 
 * [TypeScript](typescript/)
-* [GraalVM](graalvm/)
+* [GraalVM](java/)
 
 ## More information
 * [How to get started with Azure API Management]()

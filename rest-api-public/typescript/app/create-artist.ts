@@ -1,4 +1,4 @@
-import {APIGatewayProxyEvent, APIGatewayProxyStructuredResultV2, Context} from 'aws-lambda';
+import {APIGatewayProxyEvent, APIGatewayProxyStructuredResultV2} from 'aws-lambda';
 import {LambdaInterface} from "@aws-lambda-powertools/commons";
 import {v4 as uuidv4} from 'uuid';
 import {Artist} from "./model/artist";
