@@ -1,0 +1,75 @@
+variables:
+  AWS_SERVICE_CONNECTION_DEV: aws-awsome-sbx # <<Fill in the name of your own service connection here>>
+  NPM_NEXUS_SERVICE_CONNECTION: ns-npm-nexus
+  # TODO: Change location to where your package.json is located, most likely in root '.'
+  WORKDIR: 'rest-api-public/typescript'
+  NODE_VERSION: '16.x'
+
+parameters:
+  - name: environments
+    displayName: Deployment Environments
+    type: object
+    default:
+      - name: development
+        aws_service_connection: aws-awsome-dev
+        env: dev
+
+trigger:
+  branches:
+    include:
+      - '*'
+
+resources:
+  repositories:
+    - repository: templates
+      name: NSPAAS/azure-devops-templates
+      type: git
+      ref: master
+    - repository: ns-shared-guard-rules
+      name: NSCAWS/ns-shared-guard-rules
+      type: git
+    - repository: shared-templates
+      name: NSPAAS/azure-devops-templates
+      type: git
+      ref: refs/tags/main_20220921.1
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+  - stage: Build
+    jobs:
+      - job: Audit
+        displayName: Audit
+        steps:
+          - task: NodeTool@0
+            displayName: 'Install Node.js'
+            inputs:
+              versionSpec: $(NODE_VERSION)
+          - task: Npm@1
+            displayName: 'npm ci'
+            inputs:
+              command: ci
+              workingDir: $(WORKDIR)
+              customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
+          - task: Npm@1
+            displayName: 'npm audit'
+            inputs:
+              command: custom
+              customCommand: audit --audit-level=high --omit=dev
+              workingDir: $(WORKDIR)
+
+          - task: Npm@1
+            displayName: 'npm test'
+            inputs:
+              command: custom
+              customCommand: run test
+              workingDir: $(WORKDIR)
+              customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
+          - task: PublishTestResults@2
+            inputs:
+              failTaskOnFailedTests: true
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: 'Cobertura'
+              summaryFileLocation: 'coverage/cobertura-coverage.xml'
