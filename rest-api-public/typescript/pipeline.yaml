@@ -81,6 +81,29 @@ stages:
               customCommand: audit --audit-level=high --omit=dev
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
 
+  - stage: 'deploy_feature'
+    conditional: ne(variables['Build.SourceBranch'], 'refs/heads/main')
+    jobs:
+      - job: deploy
+        steps:
+          - task: Npm@1
+            displayName: npm ci
+            inputs:
+              command: ci
+              workingDir: ${{ variables.NPM_WORKING_DIR }}
+              customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
+
+          - task: AWSShellScript@1
+            displayName: deploy:feature
+            inputs:
+              awsCredentials: ${{ variables.AWS_SERVICE_CONNECTION_DEV }}
+              regionName: 'eu-west-1'
+              scriptType: 'inline'
+              workingDirectory: ${{ variables.NPM_WORKING_DIR }}
+              inlineScript: |
+                npx cdk deploy --ci -c feature=$(Build.SourceBranchName) -c config=dev -c genericConfig=generic -c Repository=$(Build.Repository.Name) -c Pipeline=$(Build.DefinitionName) --all --require-approval never
+
+
   - stage: 'deploy_dev'
     jobs:
       - job: deploy
