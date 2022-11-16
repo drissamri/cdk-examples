@@ -1,6 +1,7 @@
 variables:
   NPM_NEXUS_SERVICE_CONNECTION: ns-npm-nexus
   NPM_WORKING_DIR: 'rest-api-public/typescript'
+  NPM_CACHE_CONFIG: $(Pipeline.Workspace)/.npm
   AWS_SERVICE_CONNECTION_DEV: aws-awsome-dev # Fill in the name of your own service connection here
   AWS_SERVICE_CONNECTION_STG: <FILLMEIN>
   AWS_SERVICE_CONNECTION_PRD: <FILLMEIN>
@@ -28,6 +29,11 @@ stages:
     jobs:
       - job: build
         steps:
+          - task: Cache@2
+            inputs:
+              key: 'package-lock.json'
+              path: $(NPM_CACHE_CONFIG)
+            displayName: Cache NPM packages
           - task: Npm@1
             displayName: npm:ci
             inputs:
@@ -87,7 +93,7 @@ stages:
       - job: deploy
         steps:
           - task: Npm@1
-            displayName: npm ci
+            displayName: npm ci --cache $(NPM_CACHE_CONFIG)
             inputs:
               command: ci
               workingDir: ${{ variables.NPM_WORKING_DIR }}
@@ -109,7 +115,7 @@ stages:
       - job: deploy
         steps:
           - task: Npm@1
-            displayName: npm ci
+            displayName: npm ci --cache $(NPM_CACHE_CONFIG)
             inputs:
               command: ci
               workingDir: ${{ variables.NPM_WORKING_DIR }}
@@ -130,7 +136,7 @@ stages:
       - job: deploy
         steps:
           - task: Npm@1
-            displayName: npm ci
+            displayName: npm ci --cache $(NPM_CACHE_CONFIG)
             inputs:
               command: ci
               workingDir: ${{ variables.NPM_WORKING_DIR }}
@@ -141,7 +147,7 @@ stages:
       - job: deploy
         steps:
           - task: Npm@1
-            displayName: npm ci
+            displayName: npm ci --cache $(NPM_CACHE_CONFIG)
             inputs:
               command: ci
               workingDir: ${{ variables.NPM_WORKING_DIR }}
