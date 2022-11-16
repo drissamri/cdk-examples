@@ -35,7 +35,7 @@ stages:
               workingDir: ${{ variables.NPM_WORKING_DIR }}
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
           - task: Npm@1
-            displayName: npm:lint
+            displayName: npm:build
             inputs:
               command: custom
               workingDir: ${{ variables.NPM_WORKING_DIR }}
@@ -49,7 +49,9 @@ stages:
               customCommand: 'run lint'
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
 
-      - job: qa
+  - stage: qa
+    jobs:
+      - job: ci
         steps:
           - task: Npm@1
             displayName: npm:ci
@@ -58,7 +60,7 @@ stages:
               workingDir: ${{ variables.NPM_WORKING_DIR }}
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
           - task: Npm@1
-            displayName: Unit tests
+            displayName: unit tests
             inputs:
               command: custom
               workingDir: ${{ variables.NPM_WORKING_DIR }}
@@ -79,7 +81,7 @@ stages:
               customCommand: audit --audit-level=high --omit=dev
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
 
-  - stage: DEV
+  - stage: 'deploy dev'
     jobs:
       - job: deploy
         steps:
