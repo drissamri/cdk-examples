@@ -93,7 +93,7 @@ stages:
           - task: AWSShellScript@1
             displayName: deploy:dev
             inputs:
-              awsCredentials: ${{ environment.AWS_SERVICE_CONNECTION_DEV }}
+              awsCredentials: ${{ variables.AWS_SERVICE_CONNECTION_DEV }}
               regionName: 'eu-west-1'
               scriptType: 'inline'
               inlineScript: |
