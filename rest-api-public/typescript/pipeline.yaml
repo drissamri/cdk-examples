@@ -81,7 +81,7 @@ stages:
 
   - stage: DEV
     jobs:
-      - job: deploy:dev
+      - job: deploy
         steps:
           - task: Npm@1
             displayName: npm ci
