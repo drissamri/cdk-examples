@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
+import { BuildConfig, Config } from '@ns/cdk-helper';
 import * as cdk from 'aws-cdk-lib';
-import {BuildConfig, Config} from '@ns/cdk-helper';
-import {ApiStack} from '../lib/api-stack';
+import { ApiStack } from '../lib/api-stack';
 
 const app = new cdk.App();
 
@@ -10,12 +10,11 @@ const app = new cdk.App();
 const buildConfig: BuildConfig = Config(app);
 
 
-
 new ApiStack(app, 'RestOpenApiTypescriptStack', {
-    env: {
-        region: buildConfig.AWSRegion,
-        account: buildConfig.AWSAccount,
-    },
-    buildConfig: buildConfig,
-    tags: buildConfig.Tags,
+  env: {
+    region: buildConfig.AWSRegion,
+    account: buildConfig.AWSAccount,
+  },
+  buildConfig: buildConfig,
+  tags: buildConfig.Tags,
 });

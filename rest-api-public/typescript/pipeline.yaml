@@ -1,17 +1,9 @@
 variables:
-  AWS_SERVICE_CONNECTION_DEV: aws-awsome-dev # Fill in the name of your own service connection here
   NPM_NEXUS_SERVICE_CONNECTION: ns-npm-nexus
   NPM_WORKING_DIR: 'rest-api-public/typescript'
-#  AWS_SERVICE_CONNECTION_STG: <FILLMEIN>
-#  AWS_SERVICE_CONNECTION_PRD: <FILLMEIN>
-
-schedules:
-  - cron: '0 1 * * 0-4'
-    displayName: 'At 01:00 on every day-of-week from Monday through Thursday.'
-    branches:
-      include:
-        - main
-    always: true
+  AWS_SERVICE_CONNECTION_DEV: aws-awsome-dev # Fill in the name of your own service connection here
+  AWS_SERVICE_CONNECTION_STG: <FILLMEIN>
+  AWS_SERVICE_CONNECTION_PRD: <FILLMEIN>
 
 parameters:
   - name: environments
@@ -21,14 +13,6 @@ parameters:
       - name: development
         aws_service_connection: aws-awsome-dev
         env: dev
-#      - name: staging
-#        aws_service_connection: <FILLMEIN>
-#        env: stg
-#        aws_account_id:
-#      - name: production
-#        aws_service_connection: <FILLMEIN>
-#        env: prd
-#        aws_account_id:
 
 trigger:
   branches:
@@ -49,58 +33,36 @@ pool:
   vmImage: 'ubuntu-latest'
 
 stages:
-  # In case you need to get an AWS account id programmatically in CI, add the
-  # stage below to fetch it and set it. Update the `awsCredentials` value to
-  # your actual service connection.
-
-  # - stage: Configure
-  #   jobs:
-  #     - job: Id
-  #       displayName: 'Set AWS account id'
-  #       steps:         
-  #         - task: AWSShellScript@1
-  #           inputs:
-  #             awsCredentials: aws-awsome-dev
-  #             regionName: 'eu-west-1'
-  #             scriptType: 'inline'
-  #             inlineScript: |
-  #               echo "##vso[task.setvariable variable=aws_account_id_dev;isoutput=true]$(aws sts get-caller-identity --query "Account" --output text)"
-  #           name: 'config'
-  #
-  # It can then be accessed in the variables keyword in a job or stage:
-  #
-  #   variables:
-  #     accountId: $[ stageDependencies.Configure.Id.outputs['config.aws_account_id_dev'] ]
-  
   - stage: Build
     jobs:
       - job: Audit
         displayName: Audit
         steps:
           - task: Npm@1
-            displayName: Install deps
+            displayName: npm ci
             inputs:
               command: ci
               workingDir: ${{ variables.NPM_WORKING_DIR }}
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
           - task: Npm@1
-            displayName: Audit deps
+            displayName: npm audit
             inputs:
               command: custom
               workingDir: ${{ variables.NPM_WORKING_DIR }}
               customCommand: audit --audit-level=high --omit=dev
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
+
       - job: Analyze
         displayName: Static Code Analysis
         steps:
           - task: Npm@1
-            displayName: Install deps
+            displayName: npm ci
             inputs:
               command: ci
               workingDir: ${{ variables.NPM_WORKING_DIR }}
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
           - task: Npm@1
-            displayName: Lint code
+            displayName: linting
             inputs:
               command: custom
               workingDir: ${{ variables.NPM_WORKING_DIR }}
@@ -111,36 +73,39 @@ stages:
               serviceConnection: 'CRAWS SonarQube EE P'
               scannerMode: CLI
               configMode: file
-              configFile: sonar-project.properties
+              configFile: ${{ variables.NPM_WORKING_DIR }}/sonar-project.properties
               pollingTimeoutSec: 600
+
       - job: Test
         displayName: Unit tests
         steps:
           - task: Npm@1
-            displayName: Install deps
+            displayName: npm ci
             inputs:
               command: ci
               workingDir: ${{ variables.NPM_WORKING_DIR }}
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
           - task: Npm@1
-            displayName: Run unit tests
+            displayName: Unit tests
             inputs:
               command: custom
               workingDir: ${{ variables.NPM_WORKING_DIR }}
               customCommand: 'run test -- test/unit'
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
+
       - job: Synth
-        displayName: CDK Synth
+        displayName: cdk synth
         steps:
           - ${{ each environment in parameters.environments }}:
             - task: Npm@1
-              displayName: Install deps
+              displayName: npm ci
               inputs:
                 command: ci
                 workingDir: ${{ variables.NPM_WORKING_DIR }}
                 customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
+
             - task: AWSShellScript@1
-              displayName: CDK synth
+              displayName: cdk synth
               inputs:
                 awsCredentials: ${{ environment.aws_service_connection }}
                 regionName: 'eu-west-1'
@@ -173,16 +138,6 @@ stages:
               workingDir: ${{ variables.NPM_WORKING_DIR }}
               customCommand: 'run test -- test/integration'
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
-          # https://marketplace.visualstudio.com/items?itemName=ms-vscs-rm.vss-services-servicenowchangerequestmanagement
-          # More steps can be added here e.g. load testing
-
-  # Optionally add a Release stage if you actually release some product, like a package.
-  # - stage: Release
-  #   dependsOn:
-  #     - Build
-  #     - Test
-  #   jobs:
-  #   - job: < e.g. versioning, generate release notes>
 
   - ${{ each environment in parameters.environments }}:
     - stage: Deploy_${{ environment.name }}
@@ -199,11 +154,12 @@ stages:
                 steps:
                   - checkout: self
                   - task: Npm@1
-                    displayName: Install deps
+                    displayName: npm ci
                     inputs:
                       command: ci
                       workingDir: ${{ variables.NPM_WORKING_DIR }}
                       customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
+
                   - task: AWSShellScript@1
                     inputs:
                       awsCredentials: ${{ environment.aws_service_connection }}

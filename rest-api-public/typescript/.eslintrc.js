@@ -32,6 +32,7 @@ module.exports = {
   },
   ignorePatterns: [
     'node_modules/',
+    '*.d.ts',
   ],
   rules: {
     // Require use of the `import { foo } from 'bar';` form instead of `import foo = require('bar');`
