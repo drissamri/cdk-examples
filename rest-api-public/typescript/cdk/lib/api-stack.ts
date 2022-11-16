@@ -2,9 +2,8 @@ import * as cdk from 'aws-cdk-lib';
 import {RemovalPolicy, StackProps} from 'aws-cdk-lib';
 import {Construct} from 'constructs';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
-import {LogGroupLogDestination} from 'aws-cdk-lib/aws-apigateway';
+import {EndpointType, LogGroupLogDestination} from 'aws-cdk-lib/aws-apigateway';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
-import {Architecture} from 'aws-cdk-lib/aws-lambda';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import {BillingMode, Table} from 'aws-cdk-lib/aws-dynamodb';
 import {NodejsFunction} from "aws-cdk-lib/aws-lambda-nodejs";
@@ -39,6 +38,8 @@ export class ApiStack extends cdk.Stack {
             partitionKey: {name: 'id', type: dynamodb.AttributeType.STRING},
             billingMode: BillingMode.PAY_PER_REQUEST,
             pointInTimeRecovery: true,
+
+            // TODO: Discuss Environment config
             removalPolicy: props.buildConfig.Environment == 'Dev' ? RemovalPolicy.DESTROY : RemovalPolicy.RETAIN
         });
     }
@@ -46,6 +47,7 @@ export class ApiStack extends cdk.Stack {
     private createRestApi(props: ApiStackConfigProps, listArn: string, getArn: string, createArn: string) {
         const apigwLogGroup = new cloudwatch.LogGroup(this, 'ApiGWLogs', {
             retention: RetentionDays.ONE_WEEK,
+            // TODO: Discuss Environment config
             removalPolicy: props.buildConfig.Environment == 'Dev' ? RemovalPolicy.DESTROY : RemovalPolicy.RETAIN,
         })
 
@@ -62,10 +64,14 @@ export class ApiStack extends cdk.Stack {
                 metricsEnabled: true,
                 tracingEnabled: true
             },
+            // Disable internal AWS DNS if a custom domain is enabled
+            disableExecuteApiEndpoint: this.isCustomDomainEnabled(props),
+            endpointTypes: [EndpointType.REGIONAL]
+            // Enable compression: minimumCompressionSize
         });
 
-        if (props.buildConfig.Parameters != null && props.buildConfig.Parameters.Domain != null) {
-            new apigateway.BasePathMapping(this, 'MyBasePathMapping', {
+        if (this.isCustomDomainEnabled(props)) {
+            new apigateway.BasePathMapping(this, 'ApiBasePathMapping', {
                 restApi: api,
                 domainName: props.buildConfig.Parameters.Domain,
                 basePath: props.buildConfig.Parameters.BasePath,
@@ -77,12 +83,14 @@ export class ApiStack extends cdk.Stack {
         let apiLambda = new NodejsFunction(this, id, {
             entry: path.join(__dirname, '../../app/' + handler),
             runtime: lambda.Runtime.NODEJS_16_X,
-            architecture: Architecture.ARM_64,
             // Increased memory to improve cold starts
-            memorySize: 1024,
+            memorySize: 1792,
             handler: 'handler',
             bundling: {
-                minify: true
+                minify: true,
+                externalModules: [
+                    'aws-sdk', // Use the 'aws-sdk' available in the Lambda runtime
+                ],
             },
             // TODO: Setup logging retention to your team/app requirements but don't forget to set it (=infinite)
             logRetention: RetentionDays.ONE_MONTH,
@@ -103,7 +111,12 @@ export class ApiStack extends cdk.Stack {
         return this.resolve(Mustache.render(
             fs.readFileSync(path.join(__dirname, '../../openapi.yaml'), 'utf-8'), vars));
     }
+
+    private isCustomDomainEnabled(props: ApiStackConfigProps) {
+        return (props.buildConfig.Parameters != null && props.buildConfig.Parameters.Domain != null)
+    }
 }
+
 
 interface ApiStackConfigProps extends StackProps {
     buildConfig: BuildConfig,

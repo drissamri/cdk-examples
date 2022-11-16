@@ -9,7 +9,9 @@ const app = new cdk.App();
 // NS Specific Config helper: https://dev.azure.com/ns-topaas/NSCAWS/_git/ns-shared-cdk-helper
 const buildConfig: BuildConfig = Config(app);
 
-let apiStack = new ApiStack(app, 'RestOpenApiTypescriptStack', {
+
+
+new ApiStack(app, 'RestOpenApiTypescriptStack', {
     env: {
         region: buildConfig.AWSRegion,
         account: buildConfig.AWSAccount,

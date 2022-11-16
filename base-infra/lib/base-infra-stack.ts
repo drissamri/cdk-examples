@@ -1,10 +1,16 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import {StringParameter} from "aws-cdk-lib/aws-ssm";
-import {HostedZone, IHostedZone, RecordSet, RecordTarget, RecordType} from "aws-cdk-lib/aws-route53";
+import {
+  AaaaRecord,
+  ARecord,
+  HostedZone,
+  IHostedZone,
+  RecordTarget
+} from "aws-cdk-lib/aws-route53";
 import {DnsValidatedCertificate} from "aws-cdk-lib/aws-certificatemanager";
-import {DomainName, EndpointType, SecurityPolicy} from "aws-cdk-lib/aws-apigateway";
-import {ApiGateway} from "aws-cdk-lib/aws-route53-targets";
+import {DomainName, EndpointType} from "aws-cdk-lib/aws-apigateway";
+import {ApiGatewayDomain} from "aws-cdk-lib/aws-route53-targets";
 
 export class BaseInfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -40,12 +46,22 @@ export class BaseInfraStack extends cdk.Stack {
     });
 
     /**
-     * Setup a custom domain in AWS API Gateway that can be used by other applications
+     * Set up a custom domain in AWS API Gateway that can be used by other applications
      */
     const domain = new DomainName(this, "ApiGwDomainName", {
       domainName: subDomain,
       certificate,
-      endpointType: EndpointType.EDGE,
+      endpointType: EndpointType.REGIONAL,
+    })
+    new ARecord(this, 'ARecordAPIGw', {
+      zone: hostedZone,
+      recordName: subDomain,
+      target: RecordTarget.fromAlias(new ApiGatewayDomain(domain))
+    })
+    new AaaaRecord(this, 'AAAARecordAPIGw', {
+      zone: hostedZone,
+      recordName: subDomain,
+      target: RecordTarget.fromAlias(new ApiGatewayDomain(domain))
     })
   }
 }
