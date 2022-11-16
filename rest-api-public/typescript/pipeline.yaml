@@ -37,7 +37,8 @@ stages:
           - task: Npm@1
             displayName: npm:ci
             inputs:
-              command: ci
+              command: custom
+              customCommand: 'ci --cache $(NPM_CACHE_CONFIG)'
               workingDir: ${{ variables.NPM_WORKING_DIR }}
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
           - task: Npm@1
@@ -51,8 +52,8 @@ stages:
             displayName: npm:lint
             inputs:
               command: custom
-              workingDir: ${{ variables.NPM_WORKING_DIR }}
               customCommand: 'run lint'
+              workingDir: ${{ variables.NPM_WORKING_DIR }}
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
 
   - stage: qa
@@ -62,7 +63,8 @@ stages:
           - task: Npm@1
             displayName: npm:ci
             inputs:
-              command: ci
+              command: custom
+              customCommand: 'ci --cache $(NPM_CACHE_CONFIG)'
               workingDir: ${{ variables.NPM_WORKING_DIR }}
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
           - task: Npm@1
@@ -136,7 +138,7 @@ stages:
       - job: deploy
         steps:
           - task: Npm@1
-            displayName: npm ci --cache $(NPM_CACHE_CONFIG)
+            displayName: npm ci
             inputs:
               command: ci
               workingDir: ${{ variables.NPM_WORKING_DIR }}
@@ -147,8 +149,8 @@ stages:
       - job: deploy
         steps:
           - task: Npm@1
-            displayName: npm ci --cache $(NPM_CACHE_CONFIG)
+            displayName: npm ci
             inputs:
-              command: ci
+              command: custom
               workingDir: ${{ variables.NPM_WORKING_DIR }}
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
