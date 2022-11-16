@@ -101,3 +101,25 @@ stages:
               inlineScript: |
                 cd ${{ variables.NPM_WORKING_DIR }}
                 npx cdk deploy --ci -c config=dev -c genericConfig=generic -c Repository=$(Build.Repository.Name) -c Pipeline=$(Build.DefinitionName) --all --require-approval never
+
+  - stage: 'deploy_staging'
+    jobs:
+      - job: deploy
+        steps:
+          - task: Npm@1
+            displayName: npm ci
+            inputs:
+              command: ci
+              workingDir: ${{ variables.NPM_WORKING_DIR }}
+              customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
+
+  - stage: 'deploy_prod'
+    jobs:
+      - job: deploy
+        steps:
+          - task: Npm@1
+            displayName: npm ci
+            inputs:
+              command: ci
+              workingDir: ${{ variables.NPM_WORKING_DIR }}
+              customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
