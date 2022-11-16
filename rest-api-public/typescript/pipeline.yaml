@@ -38,7 +38,7 @@ stages:
             displayName: npm:ci
             inputs:
               command: custom
-              customCommand: 'ci --cache $(NPM_CACHE_CONFIG) --omit=dev'
+              customCommand: 'ci --cache $(NPM_CACHE_CONFIG)'
               workingDir: ${{ variables.NPM_WORKING_DIR }}
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
           - task: Npm@1
@@ -64,7 +64,7 @@ stages:
             displayName: npm:ci
             inputs:
               command: custom
-              customCommand: 'ci --cache $(NPM_CACHE_CONFIG) --omit=dev'
+              customCommand: 'ci --cache $(NPM_CACHE_CONFIG)'
               workingDir: ${{ variables.NPM_WORKING_DIR }}
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
           - task: Npm@1
@@ -86,7 +86,7 @@ stages:
             inputs:
               command: custom
               workingDir: ${{ variables.NPM_WORKING_DIR }}
-              customCommand: audit --audit-level=high --omit=dev
+              customCommand: 'audit --audit-level=high'
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
 
   - stage: 'deploy_feature'
@@ -98,7 +98,7 @@ stages:
             displayName: npm ci
             inputs:
               command: custom
-              customCommand: 'ci --cache $(NPM_CACHE_CONFIG) --omit=dev'
+              customCommand: 'ci --cache $(NPM_CACHE_CONFIG)'
               workingDir: $(NPM_WORKING_DIR)
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
 
@@ -118,10 +118,10 @@ stages:
       - job: deploy
         steps:
           - task: Npm@1
-            displayName: npm ci --cache $(NPM_CACHE_CONFIG) --omit=dev
+            displayName: npm ci
             inputs:
               command: custom
-              customCommand: 'ci --cache $(NPM_CACHE_CONFIG) --omit=dev'
+              customCommand: 'ci --cache $(NPM_CACHE_CONFIG)'
               workingDir: $(NPM_WORKING_DIR)
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
 
