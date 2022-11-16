@@ -114,6 +114,7 @@ stages:
 
 
   - stage: 'deploy_dev'
+    condition: succeeded()
     jobs:
       - job: deploy
         steps:
