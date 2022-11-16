@@ -114,7 +114,9 @@ stages:
 
 
   - stage: 'deploy_dev'
-    condition: succeeded()
+    condition: in(dependencies.build.deploy_feature, 'Succeeded', 'Skipped')
+
+
     jobs:
       - job: deploy
         steps:
