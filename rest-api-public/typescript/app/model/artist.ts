@@ -1,5 +1,5 @@
 export interface Artist {
-    id: string;
-    name: string;
-    albums_recorded: number;
+  id: string;
+  name: string;
+  albums_recorded: number;
 }
