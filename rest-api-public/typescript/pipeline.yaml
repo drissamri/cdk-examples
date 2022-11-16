@@ -79,7 +79,7 @@ stages:
               customCommand: audit --audit-level=high --omit=dev
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
 
-  - stage: deploy dev
+  - stage: DEV
     jobs:
       - job: deploy:dev
         steps:
