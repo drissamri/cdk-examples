@@ -99,7 +99,7 @@ stages:
             inputs:
               command: custom
               customCommand: 'ci --cache $(NPM_CACHE_CONFIG) --omit=dev'
-              workingDir: ${{ variables.NPM_WORKING_DIR }}
+              workingDir: $(NPM_WORKING_DIR)
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
 
         #  - task: AWSShellScript@1
@@ -120,16 +120,17 @@ stages:
           - task: Npm@1
             displayName: npm ci --cache $(NPM_CACHE_CONFIG) --omit=dev
             inputs:
-              command: ci
-              workingDir: ${{ variables.NPM_WORKING_DIR }}
+              command: custom
+              customCommand: 'ci --cache $(NPM_CACHE_CONFIG) --omit=dev'
+              workingDir: $(NPM_WORKING_DIR)
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
 
           - task: AWSShellScript@1
             displayName: deploy:dev
             inputs:
-              awsCredentials: ${{ variables.AWS_SERVICE_CONNECTION_DEV }}
+              awsCredentials: $(AWS_SERVICE_CONNECTION_DEV)
               regionName: 'eu-west-1'
               scriptType: 'inline'
+              workingDirectory: $(NPM_WORKING_DIR)
               inlineScript: |
-                cd ${{ variables.NPM_WORKING_DIR }}
                 npx cdk deploy --ci -c config=dev -c genericConfig=generic -c Repository=$(Build.Repository.Name) -c Pipeline=$(Build.DefinitionName) --all --require-approval never
