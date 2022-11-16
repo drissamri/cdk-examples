@@ -57,16 +57,13 @@ stages:
               command: ci
               workingDir: ${{ variables.NPM_WORKING_DIR }}
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
-          - job: test
+          - task: Npm@1
             displayName: Unit tests
-            steps:
-              - task: Npm@1
-                displayName: Unit tests
-                inputs:
-                  command: custom
-                  workingDir: ${{ variables.NPM_WORKING_DIR }}
-                  customCommand: 'run test -- test/unit'
-                  customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
+            inputs:
+              command: custom
+              workingDir: ${{ variables.NPM_WORKING_DIR }}
+              customCommand: 'run test -- test/unit'
+              customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
           - template: steps/test/code-analysis/sonarqube.yml@shared-templates
             parameters:
               serviceConnection: 'CRAWS SonarQube EE P'
