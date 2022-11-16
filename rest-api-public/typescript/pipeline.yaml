@@ -27,7 +27,6 @@ stages:
   - stage: build
     jobs:
       - job: build
-        displayName: Build
         steps:
           - task: Npm@1
             displayName: npm:ci
@@ -51,7 +50,6 @@ stages:
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
 
       - job: qa
-        display: Quality Assurance
         steps:
           - task: Npm@1
             displayName: npm:ci
@@ -87,7 +85,6 @@ stages:
   - stage: deploy dev
     jobs:
       - job: deploy:dev
-        displayName: deploy:dev
         steps:
           - task: Npm@1
             displayName: npm ci
