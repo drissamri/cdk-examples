@@ -9,7 +9,7 @@
     "watch": "tsc -w",
     "test": "jest --coverage --coverageReporters=cobertura --reporters=jest-junit --passWithNoTests",
     "cdk": "cdk",
-    "lint": "eslint cdk/**/*.ts app/**/*.ts",
+    "lint": "./node_modules/.bin/eslint cdk/**/*.ts app/**/*.ts",
     "cdk-deploy-dev": "cdk deploy -c config=dev -c genericConfig=generic"
   },
   "devDependencies": {
