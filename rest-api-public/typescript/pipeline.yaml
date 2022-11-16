@@ -82,7 +82,7 @@ stages:
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
 
   - stage: 'deploy_feature'
-    conditional: ne(variables['Build.SourceBranch'], 'refs/heads/main')
+    condition: ne(variables['Build.SourceBranch'], 'refs/heads/main')
     jobs:
       - job: deploy
         steps:
