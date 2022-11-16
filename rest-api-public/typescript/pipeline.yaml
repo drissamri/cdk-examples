@@ -5,15 +5,6 @@ variables:
   AWS_SERVICE_CONNECTION_STG: <FILLMEIN>
   AWS_SERVICE_CONNECTION_PRD: <FILLMEIN>
 
-parameters:
-  - name: environments
-    displayName: Deployment Environments
-    type: object
-    default:
-      - name: development
-        aws_service_connection: aws-awsome-dev
-        env: dev
-
 trigger:
   branches:
     include:
@@ -33,41 +24,51 @@ pool:
   vmImage: 'ubuntu-latest'
 
 stages:
-  - stage: Build
+  - stage: build
     jobs:
-      - job: Audit
-        displayName: Audit
+      - job: build
+        displayName: Build
         steps:
           - task: Npm@1
-            displayName: npm ci
+            displayName: npm:ci
             inputs:
               command: ci
               workingDir: ${{ variables.NPM_WORKING_DIR }}
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
           - task: Npm@1
-            displayName: npm audit
+            displayName: npm:lint
             inputs:
               command: custom
               workingDir: ${{ variables.NPM_WORKING_DIR }}
-              customCommand: audit --audit-level=high --omit=dev
-              customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
-
-      - job: Analyze
-        displayName: Static Code Analysis
-        steps:
-          - task: Npm@1
-            displayName: npm ci
-            inputs:
-              command: ci
-              workingDir: ${{ variables.NPM_WORKING_DIR }}
+              customCommand: 'run build'
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
           - task: Npm@1
-            displayName: linting
+            displayName: npm:lint
             inputs:
               command: custom
               workingDir: ${{ variables.NPM_WORKING_DIR }}
               customCommand: 'run lint'
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
+
+      - job: qa
+        display: Quality Assurance
+        steps:
+          - task: Npm@1
+            displayName: npm:ci
+            inputs:
+              command: ci
+              workingDir: ${{ variables.NPM_WORKING_DIR }}
+              customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
+          - job: test
+            displayName: Unit tests
+            steps:
+              - task: Npm@1
+                displayName: Unit tests
+                inputs:
+                  command: custom
+                  workingDir: ${{ variables.NPM_WORKING_DIR }}
+                  customCommand: 'run test -- test/unit'
+                  customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
           - template: steps/test/code-analysis/sonarqube.yml@shared-templates
             parameters:
               serviceConnection: 'CRAWS SonarQube EE P'
@@ -75,9 +76,18 @@ stages:
               configMode: file
               configFile: ${{ variables.NPM_WORKING_DIR }}/sonar-project.properties
               pollingTimeoutSec: 600
+          - task: Npm@1
+            displayName: npm:audit
+            inputs:
+              command: custom
+              workingDir: ${{ variables.NPM_WORKING_DIR }}
+              customCommand: audit --audit-level=high --omit=dev
+              customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
 
-      - job: Test
-        displayName: Unit tests
+  - stage: deploy dev
+    jobs:
+      - job: deploy:dev
+        displayName: deploy:dev
         steps:
           - task: Npm@1
             displayName: npm ci
@@ -85,88 +95,13 @@ stages:
               command: ci
               workingDir: ${{ variables.NPM_WORKING_DIR }}
               customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
-          - task: Npm@1
-            displayName: Unit tests
+
+          - task: AWSShellScript@1
+            displayName: deploy:dev
             inputs:
-              command: custom
-              workingDir: ${{ variables.NPM_WORKING_DIR }}
-              customCommand: 'run test -- test/unit'
-              customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
-
-      - job: Synth
-        displayName: cdk synth
-        steps:
-          - ${{ each environment in parameters.environments }}:
-            - task: Npm@1
-              displayName: npm ci
-              inputs:
-                command: ci
-                workingDir: ${{ variables.NPM_WORKING_DIR }}
-                customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
-
-            - task: AWSShellScript@1
-              displayName: cdk synth
-              inputs:
-                awsCredentials: ${{ environment.aws_service_connection }}
-                regionName: 'eu-west-1'
-                scriptType: 'inline'
-                inlineScript: |
-                  cd ${{ variables.NPM_WORKING_DIR }}
-                  npx cdk synth --ci -c config=${{ environment.env }} -c genericConfig=generic -c Repository=$(Build.Repository.Name) -c Pipeline=$(Build.DefinitionName) --all --require-approval never
-                displayName: 'Synth development environment'
-                # https://github.com/aws/aws-cdk/issues/5552
-                failOnStandardError: false # Fails when set to true, even on successful synth? 
-            # condition: and(always(), ne(variables['Build.Reason'], 'Schedule'))
-
-  - stage: Test
-    # explicit no deps to run stage in parallel with build
-    dependsOn: []
-    jobs:
-      - job: Test
-        displayName: Integration Tests
-        steps:
-          - task: Npm@1
-            displayName: Install deps
-            inputs:
-              command: ci
-              workingDir: ${{ variables.NPM_WORKING_DIR }}
-              customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
-          - task: Npm@1
-            displayName: Run integration tests
-            inputs:
-              command: custom
-              workingDir: ${{ variables.NPM_WORKING_DIR }}
-              customCommand: 'run test -- test/integration'
-              customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
-
-  - ${{ each environment in parameters.environments }}:
-    - stage: Deploy_${{ environment.name }}
-      dependsOn:
-        - Build
-        - Test
-      jobs:
-        - deployment: Deploy
-          environment: ${{ environment.name }}
-          displayName: CDK Deploy
-          strategy:
-            runOnce:
-              deploy:
-                steps:
-                  - checkout: self
-                  - task: Npm@1
-                    displayName: npm ci
-                    inputs:
-                      command: ci
-                      workingDir: ${{ variables.NPM_WORKING_DIR }}
-                      customEndpoint: $(NPM_NEXUS_SERVICE_CONNECTION)
-
-                  - task: AWSShellScript@1
-                    inputs:
-                      awsCredentials: ${{ environment.aws_service_connection }}
-                      regionName: 'eu-west-1'
-                      scriptType: 'inline'
-                      inlineScript: |
-                        cd ${{ variables.NPM_WORKING_DIR }}
-                        npx cdk deploy --ci -c config=${{ environment.env }} -c genericConfig=generic -c Repository=$(Build.Repository.Name) -c Pipeline=$(Build.DefinitionName) --all --require-approval never
-                      displayName: 'Deploy ${{ environment.env }} environment'
-                      failOnStandardError: false # Fails when set to true, even on successful deploy?
+              awsCredentials: ${{ environment.AWS_SERVICE_CONNECTION_DEV }}
+              regionName: 'eu-west-1'
+              scriptType: 'inline'
+              inlineScript: |
+                cd ${{ variables.NPM_WORKING_DIR }}
+                npx cdk deploy --ci -c config=dev -c genericConfig=generic -c Repository=$(Build.Repository.Name) -c Pipeline=$(Build.DefinitionName) --all --require-approval never
